@@ -19,6 +19,16 @@ public:
     std::scoped_lock guard(lhs.m, rhs.m);
     std::swap(lhs.some_data, rhs.some_data);
   }
+  friend void swap_v3(X& lhs, X& rhs){
+    // defer_lock allows passing unlocked locks and handling
+    // acquring the mutex later on
+    std::unique_lock<std::mutex> lock_a(lhs.m, std::defer_lock);
+    std::unique_lock<std::mutex> lock_b(rhs.m, std::defer_lock);
+    // adopt_lock assumes the mutex is already locked and
+    // will not try to lock it again
+    std::lock(lock_a, lock_b);
+    std::swap(lhs.some_data, rhs.some_data);
+  }
 };
 
 int main(void){
